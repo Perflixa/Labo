@@ -1,0 +1,251 @@
+Het enige probleem dewelke ik was tegen gekomen was dat ik geen default gateway had ingesteld 
+op mijn switches 
+_________________________________
+hostname LAB-RA07-A01-SW01
+
+vlan 71
+name Management
+exit
+vlan 72 
+name Data_Users
+exit
+vlan 73 
+name Voice_Users
+exit
+vlan 74
+name Reserved
+exit
+vlan 99 
+name Native
+exit
+
+interface vlan 71 
+ip address 172.17.7.4 255.255.255.240
+exit
+
+interface range gigabitEthernet 1/0/23-24
+no shut
+channel-group 1 mode active
+interface range gigabitEthernet 1/0/21-22
+channel-group 2 mode active
+exit
+
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+exit
+interface port-channel 2
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+exit
+
+spanning-tree VLAN 71-74 priority 0
+spanning-tree mode rapid-pvst
+----------------------------------------------------------------------
+
+hostname LAB-RA07-A01-SW02
+
+vlan 71
+name Management
+exit
+vlan 72 
+name Data_Users
+exit
+vlan 73 
+name Voice_Users
+exit
+vlan 74
+name Reserved
+exit
+vlan 99 
+name Native
+exit
+
+interface vlan 71 
+ip address 172.17.7.5 255.255.255.240
+
+interface range gigabitEthernet 1/0/23-24
+channel-group 3 mode active
+interface range gigabitEthernet 1/0/21-22
+channel-group 2 mode active
+
+interface port-channel 3
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+exit
+
+interface port-channel 2
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+exit
+
+spanning-tree VLAN 71-74 priority 28672
+spanning-tree mode rapid-pvst
+-----------------------------------------------------------
+
+hostname LAB-RA07-A01-SW03
+
+Line console 0
+password console
+exit 
+enable secret secret
+
+vlan 71
+name Management
+exit
+vlan 72 
+name Data_Users
+exit
+vlan 73 
+name Voice_Users
+exit
+vlan 74
+name Reserved
+exit
+vlan 99 
+name Native
+exit
+
+interface vlan 71 
+ip address 172.17.7.6 255.255.255.240
+exit
+
+interface range fa 0/23-24
+channel-group 3 mode active
+exit
+interface range fa 0/21-22
+channel-group 1 mode active
+exit
+
+interface g0/1
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+spanning-tree bpduguard enable
+
+interface port-channel 1
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+exit
+interface port-channel 3
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 71,72,73,74
+exit
+
+spanning-tree VLAN 71-74 priority 61440
+spanning-tree mode rapid-pvst
+-----------------------------------------------------------
+enable
+conf t
+hostname LAB-RA07-C01-R01
+interface G0/0/0
+no shut
+exit
+
+interface G0/0/0.71
+encapsulation dot1q 71
+ip add 172.17.7.2 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.1
+standby 1 priority 150
+standby 1 preempt
+exit
+
+interface G0/0/0.72
+encapsulation dot1q 72
+ip add 172.17.7.18 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.17
+standby 1 priority 150
+standby 1 preempt
+ip helper-address 10.199.64.66
+exit
+
+interface G0/0/0.73
+encapsulation dot1q 73
+ip add 172.17.7.34 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.33
+standby 1 priority 150
+standby 1 preempt
+exit
+
+interface G0/0/0.74
+encapsulation dot1q 74
+ip add 172.17.7.50 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.49
+standby 1 priority 150
+standby 1 preempt
+exit
+
+interface G0/0/0.99
+encapsulation dot1q 99 native
+exit
+
+interface G0/0/1
+no shutdown
+ip add 10.199.65.113 255.255.255.224
+exit 
+ip route 0.0.0.0 0.0.0.0 10.199.65.100
+
+-----------------------------------------------------------
+enable
+conf t
+hostname LAB-RA07-C01-R02
+interface G0/0/0
+no shut
+exit
+
+interface G0/0/0.71
+encapsulation dot1q 71
+ip add 172.17.7.3 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.1
+standby 1 priority 100
+standby 1 preempt
+exit
+
+interface G0/0/0.72
+encapsulation dot1q 72
+ip add 172.17.7.19 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.17
+standby 1 priority 100
+standby 1 preempt
+ip helper-address 10.199.64.66
+exit
+
+interface G0/0/0.73
+encapsulation dot1q 73
+ip add 172.17.7.35 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.33
+standby 1 priority 100
+standby 1 preempt
+exit
+
+interface G0/0/0.74
+encapsulation dot1q 74
+ip add 172.17.7.50 255.255.255.240
+standby version 2
+standby 1 ip 172.17.7.48
+standby 1 priority 100
+standby 1 preempt
+exit
+
+interface G0/0/0.99
+encapsulation dot1q 99 native
+exit
+
+interface G0/0/1
+no shutdown
+ip add 10.199.65.213 255.255.255.224
+exit 
+ip route 0.0.0.0 0.0.0.0 10.199.65.200

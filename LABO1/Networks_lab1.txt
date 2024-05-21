@@ -1,0 +1,181 @@
+1.1 Install different tools/packages on Ubuntu DEVASC-LABVM: 
+
+	-Python 3.8 and PIP
+	-Visual Studio Code
+	-Jupyter Notebook
+	-Python IDLE
+
+Document your findings in 3 steps:
+
+	•Task preparation and implementation:
+		Installatie:
+			Python - PIP
+			sudo apt install python3.8 python3-pip(1)
+
+			Visual Studio Code
+			sudo snap install --classic code (allready installed)
+
+			Jupyter Notebook
+			pip install jupyter
+
+			Python IDLE
+			sudo apt install idle-python3.8
+	
+
+	•Task troubleshooting:
+			
+
+	•Task verification:
+		Verifiëer de installatie:	Python3.8 --version 
+			 			pip3 --version
+						code --version
+						pip show jupyter
+						python3.8 (u zal in een andere prompt komen)
+						
+
+
+1.2 Run geopy and timedate Python Scipts on the DEVASC-LABVM using the tools above (1.1):
+	
+	-timedate.py
+	-geopy-geocoders_location.py
+	-location.py
+
+	Scripts can be found via Github repository: https://github.com/KathleenHombroeks/PythonExperiments
+
+Document your findings in 3 steps:
+
+	• Task preparation and implementation:
+		timedate.py
+			In eerste instantie importeer je de module datetime.Deze roep je later
+			in het script weer aan met datetime.datetime.now(). Dit zorg voor
+			datum en tijd zoals het nu is (uitvoer van script)
+
+		geopy-geocoders_location.py (1)
+			Eerst krijgt met een error betreffende dat geopy module niet aanwezig is.
+			Na installatie krijgt met dat folium niet geinstaleerd is. Bekijk "Task troubleschooting hieronder om dit probleem optelossen.
+		
+		Na de installatie:
+			Eerst worden de benodigde bibliotheren geinporteerd: geopy.gecoders, folium
+			Hierna wordt een object gemaakt met nominatim(user_agent=...)
+			met de var city_country specifiëer je de stad en het land. 
+			met de var location wordt de coordinaten opgehaald van de gespecifieerde stad. 
+			Hier na komt een stuk dat het adress en coordinaten afdrukt op het scherm. 
+			In het volgend stuk wordt met de functie Folium de kaart gecentreerd op 
+			de opgegeven coordinaten met een zoomniveau van 12. De kaart is afkomstig van Open Street Map
+			Deze map wordt dan opgeslagen als een HTML op de huidige plaast waar het scrip uitgevoerd wordt.
+
+		location.py
+			Na het installeren van geopy is het uitvoeren van het script geen probleem. 
+			Dit doet net het zelfde als het vorige script het enige verschill is dat men geen gebruik maakt van
+			de folium bibliotheek en zo dus niet een foto opslaat van de gevraagde locatie.
+
+	• Task troubleshooting:
+		(1)	error: ModuleNotFOundError: No module named 'geopy'
+			Oplossing: pip3 install geopy
+
+			error: ModuleNotFOundError: No module named 'folium'
+			Oplossing: pip3 install folium
+
+	• Task verification:
+		Test het script door deze uit te voeren: in ubuntu cli: 	python3 timedate.py
+										python3 geopy-geocoders_location.py
+										python3 location.py
+
+1.3 Install different tools/packages on Windows OS (deep dive exercise) ++
+
+	-Python 3.8 and PIP
+	-Visual Studio Code
+	-Jupyter Notebook-Python IDLE
+
+Investigate the compatibility of the tools with Windows OS and explain briefly if necessary.
+Document your findings in 3 steps:
+
+	•Task preparation and implementation:
+
+		Python 3.8 en PIP:
+		Python is compatibel met Windows. 
+		U kunt de Python downloaden vanaf de website (https://www.python.org/downloads/).
+		Tijdens de installatie moet u ervoor zorgen dat u de optie selecteert om Python 
+		aan het systeem-PATH toe te voegen en pip te installeren.
+
+		Visual Studio Code (VS Code):
+		Visual Studio Code is compatibel met Windows. 
+		U kunt het VS downloaden van de website (https://code.visualstudio.com/).
+		Bij het uitvoeren van de executible wordt de installatie gestart aan de hand van een wizzard.
+
+		Jupyter Notebook:
+		Jupyter Notebook is compatibel met Windows. 
+		Aangezien u al Python en pip hebt geïnstalleerd, kunt u Jupyter Notebook installeren met behulp van pip. 
+		Open een opdrachtprompt en voer de volgende opdracht uit:
+			pip install jupyter
+
+		Python IDLE:
+		Python IDLE wordt standaard meegeleverd met de Python-installatie op Windows.
+		Wanneer u Python installeert, wordt IDLE automatisch samen met Python geïnstalleerd. 
+		U kunt Python IDLE openen door in het Start-menu naar "IDLE" te zoeken.
+
+	•Task troubleshooting:
+		Als u fouten tegenkomt die verband houden met het PATH- of omgevingsvariabelen
+		tijdens de Python-installatie, kunt u proberen het installatieprogramma als beheerder uit te voeren of Python handmatig aan het PATH toe te voegen.
+
+		Voor de rest kijk naar de systeem vereiste van de software 
+
+	•Task verification:
+		python3 --version
+		pip --version
+		jupyter notebook 
+		IDLE zoeken in het start menu en opstarten 
+		VS zoeken in het start menu en opstraten 
+
+1.4 Install different tools/packages on Ubuntu 22.04.01 LTS (deep dive exercise) ++
+
+	- Python 3.8 and PIP
+	- Visual Studio Code
+	- Jupyter Notebook
+	- Python IDLE
+
+Document your findings in 3 steps:
+
+•Task preparation and implementation:
+	Alle file hebben de extentie '.py' wat betekent dat het gaat om een python script. 
+	Voor het uitvoeren van een python script voer het volgende uit in terminal : python3.8 <script>.
+	
+	Import is om functionaliteiten van externe modules te gebruiken. 	
+
+		timedate.py
+		In eerste instantie importeer je de module datetime.Deze roep je later
+		in het script weer aan met datetime.datetime.now(). Dit zorg voor
+		datum en tijd zoals het nu is (uitvoer van script)
+
+		geopy-geocoders_location.py (1)
+		Eerst krijgt met een error betreffende dat geopy module niet aanwezig is.
+		Na installatie krijgt met dat folium niet geinstaleerd is. Bekijk "Task troubleschooting hieronder om dit probleem optelossen.
+		
+		Na de installatie:
+			Eerst worden de benodigde bibliotheren geinporteerd: geopy.gecoders, folium
+			Hierna wordt een object gemaakt met nominatim(user_agent=...)
+			met de var city_country specifiëer je de stad en het land. 
+			met de var location wordt de coordinaten opgehaald van de gespecifieerde stad. 
+			Hier na komt een stuk dat het adress en coordinaten afdrukt op het scherm. 
+			In het volgend stuk wordt met de functie Folium de kaart gecentreerd op 
+			de opgegeven coordinaten met een zoomniveau van 12. De kaart is afkomstig van Open Street Map
+			Deze map wordt dan opgeslagen als een HTML op de huidige plaast waar het scrip uitgevoerd wordt. 
+
+		location.py	
+			Na het installeren van geopy is het uitvoeren van het script geen probleem. 
+			Dit doet net het zelfde als het vorige script het enige verschill is dat men geen gebruik maakt van
+			de folium bibliotheek en zo dus niet een foto opslaat van de gevraagde locatie. 	
+
+	•Task troubleshooting:
+		(1)	error: ModuleNotFOundError: No module named 'geopy'
+			Oplossing: pip3 install geopy
+
+			error: ModuleNotFOundError: No module named 'folium'
+			Oplossing: pip3 install folium 
+
+
+	•Task verification:
+		Test het script door deze uit te voeren: 
+			in ubuntu cli: 	python3 timedate.py
+					python3 geopy-geocoders_location.py
+					python3 location.py

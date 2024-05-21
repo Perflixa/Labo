@@ -1,0 +1,490 @@
+Part 1: Connecting to a single iOS device
+	Allereerst moeten we de netmiko module inlanden met colgend commando 
+		pip install netmiko
+		
+	- Sending single show command
+	
+		#### DEVNET SANDBOX -- ALWAYS ON
+		import datetime
+		print ("Current date and time: ")
+		print(datetime.datetime.now())
+		print("Connecting via SSH => show version")
+		#
+		from netmiko import ConnectHandler
+		sshCli = ConnectHandler(
+			device_type="cisco_ios",
+			host="172.17.7.1",
+			port="22",
+			username="Sasha",
+			password="cisco"
+			)
+		output=sshCli.send_command("show version")
+		print(output)
+		
+	- Sending multiple show commands
+		#### DEVNET SANDBOX -- ALWAYS ON
+		import datetime
+		print ("Current date and time: ")
+		print(datetime.datetime.now())
+		print("Connecting via SSH => multiple show")
+
+		from netmiko import ConnectHandler
+		# Establish SSH connection
+		sshCli = ConnectHandler(
+			device_type="cisco_ios",
+			host="172.17.7.1",
+			port="22",
+			username="Sasha",
+			password="cisco"
+		)
+
+		# List of show commands
+		show_commands = ["show version", "show interfaces"]
+
+		# Sending each show command and printing the output
+		for command in show_commands:
+			output = sshCli.send_command(command)
+			print(f"Output of '{command}':")
+			print(output)
+			print("=" * 50)
+
+		# Close the SSH connection
+		sshCli.disconnect()
+	
+	- Send multiple configuration commands to a single device
+		# Define the device parameters
+		device = {
+			'device_type': 'cisco_ios',
+			'ip': '172.17.7.1',  
+			'username': 'Sasha',  
+			'password': 'cisco', 
+			'secret': 'secret'
+		}
+
+		# List of configuration commands
+		config_commands = [
+			'interface GigabitEthernet 0/0/1',
+			'description Connected to SW08',
+			'no shutdown'
+		]
+
+		# Connect to the device
+		with ConnectHandler(**device) as conn:
+			# Enter enable mode if needed
+			conn.enable()
+
+			# Send configuration commands
+			output = conn.send_config_set(config_commands)
+
+			# Print the output
+			print(output)
+	
+Part 2&3 : Connect to multiple IOS devices
+- Send show commands to multiple devices
+	from netmiko import ConnectHandler
+
+	# List of devices
+	devices = [
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.1',
+			'username': 'Sasha',
+			'password': 'cisco',
+		},
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.2',
+			'username': 'Sasha',
+			'password': 'cisco',
+		},
+	]
+
+	# List of show commands
+	show_commands = [
+		'show version',
+		'show interfaces',
+	]
+
+	# Loop through each device
+	for device in devices:
+		# Connect to the device
+		with ConnectHandler(**device) as conn:
+			# Send show commands
+			for command in show_commands:
+				output = conn.send_command(command)
+				print(f"Output of {command} on {device['host']}:\n{output}\n")
+	
+- Send configuration commands to multiple devices
+	from netmiko import ConnectHandler
+
+	# List of devices
+	devices = [
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.4',
+			'username': 'Sasha',
+			'password': 'cisco',
+			'secret': 'secret',
+		},
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.5',
+			'username': 'Sasha',
+			'password': 'cisco',
+			'secret': 'secret',
+		},
+	]
+
+	# List of configuration commands
+	config_commands = [
+		'interface GigabitEthernet1/0/23',
+		'description Connection to Switchx',
+		'no shutdown'
+	]
+
+	# Loop through each device
+	for device in devices:
+		# Connect to the device
+		with ConnectHandler(**device) as conn:
+			# Enter enable mode if needed
+			conn.enable()
+
+			# Send configuration commands
+			output = conn.send_config_set(config_commands)
+			print(f"Configuration commands applied on {device['host']}:\n{output}\n")
+	
+	- Run show commands and save the output
+	from netmiko import ConnectHandler
+
+	# List of devices
+	devices = [
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.4',
+			'username': 'Sasha',
+			'password': 'cisco',
+			'secret': 'secret',
+		},
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.5',
+			'username': 'Sasha',
+			'password': 'cisco',
+			'secret': 'secret',
+		},
+	]
+
+	# List of show commands
+	show_commands = [
+		'show version',
+		'show interfaces',
+		# Add more show commands as needed
+	]
+
+	# Loop through each device
+	for device in devices:
+		# Connect to the device
+		with ConnectHandler(**device) as conn:
+			# Create a filename based on the device IP
+			filename = f"{device['host']}_output.txt"
+			
+			# Open a file in write mode to save the output
+			with open(filename, 'w') as f:
+				# Send show commands
+				for command in show_commands:
+					output = conn.send_command(command)
+					f.write(f"Output of {command} on {device['host']}:\n{output}\n\n")
+					
+			print(f"Output saved to {filename}")
+
+	- Backup the device configurations
+	from netmiko import ConnectHandler
+
+	# List of devices
+	devices = [
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.1',
+			'username': 'Sasha',
+			'password': 'cisco',
+		},
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.2',
+			'username': 'Sasha',
+			'password': 'cisco',
+		},
+	]
+
+	# Loop through each device
+	for device in devices:
+		# Connect to the device
+		with ConnectHandler(**device) as conn:
+			# Get the device hostname
+			hostname = conn.find_prompt().strip("#")
+			
+			# Send the command to get the running configuration
+			output = conn.send_command("show running-config")
+			
+			# Create a filename based on the device IP and hostname
+			filename = f"{device['host']}_{hostname}_config.txt"
+			
+			# Open a file in write mode to save the configuration
+			with open(filename, 'w') as f:
+				f.write(output)
+			
+			print(f"Configuration saved to {filename}")
+			
+	- Configure a subset of Interfaces
+	from netmiko import ConnectHandler
+
+	# List of devices
+	devices = [
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.4',
+			'username': 'Sasha',
+			'password': 'cisco',
+		},
+		{
+			'device_type': 'cisco_ios',
+			'host': '172.17.7.5',
+			'username': 'Sasha',
+			'password': 'cisco',
+		},
+	]
+	interface_configs = {
+		'GigabitEthernet1/0/1': [
+			'description No connection',
+			'no shutdown'
+		],
+		'GigabitEthernet1/0/2': [
+			'description No connection',
+			'no shutdown'
+		],
+	}
+
+	# Loop through each device
+	for device in devices:
+		# Connect to the device
+		with ConnectHandler(**device) as conn:
+			# Enter enable mode if needed
+			conn.enable()
+
+			# Loop through each interface and its configuration
+			for interface, configs in interface_configs.items():
+				# Form the configuration commands
+				config_commands = [f'interface {interface}'] + configs
+
+				# Send configuration commands
+				output = conn.send_config_set(config_commands)
+				print(f"Configuration applied on {device['host']} for interface {interface}:\n{output}\n")
+		
+	- Send device configuration using an external file
+	External file 
+	
+		[172.17.7.1]
+		interface GigabitEthernet0/0/1
+		 description Connection to Switch08
+		 no shutdown
+
+		[172.17.7.2]
+		interface GigabitEthernet0/0/1
+		 description Connection to Switch13
+		 no shutdown
+	
+	script
+	
+		from netmiko import ConnectHandler
+
+		# Function to read configurations from file
+		def read_configurations(filename):
+			configurations = {}
+			with open(filename, 'r') as file:
+				lines = file.readlines()
+				current_device = None
+				for line in lines:
+					line = line.strip()
+					if line.startswith('[') and line.endswith(']'):
+						current_device = line[1:-1]
+						configurations[current_device] = []
+					elif current_device:
+						configurations[current_device].append(line)
+			return configurations
+
+		# List of devices
+		devices = [
+			{
+				'device_type': 'cisco_ios',
+				'host': '172.17.7.1',
+				'username': 'Sasha',
+				'password': 'cisco',
+			},
+			{
+				'device_type': 'cisco_ios',
+				'host': '172.17.7.2',
+				'username': 'Sasha',
+				'password': 'cisco',
+			},
+			# Add more devices as needed
+		]
+
+		# Read configurations from file
+		configurations = read_configurations('config_command.txt')
+
+		# Loop through each device
+		for device in devices:
+			# Connect to the device
+			with ConnectHandler(**device) as conn:
+				# Enter enable mode if needed
+				conn.enable()
+
+				# Get configurations for this device
+				device_configs = configurations.get(device['host'])
+				if device_configs:
+					# Send configuration commands
+					output = conn.send_config_set(device_configs)
+					print(f"Configuration applied on {device['host']}:\n{output}\n")
+				else:
+					print(f"No configurations found for {device['host']} in the file.")
+					
+	- Connect using a Python Dictionary
+		eerder hierboven al aangegeven. 
+		
+	- Execute a script with a Function or classes
+	Function 
+		from netmiko import ConnectHandler
+
+		def connect_to_device(device_info):
+			with ConnectHandler(**device_info) as conn:
+				conn.enable()
+				output = conn.send_command("show version")
+				print(output)
+
+		def main():
+			devices = [
+				{
+					'device_type': 'cisco_ios',
+					'ip': '172.17.7.1',  
+					'username': 'Sasha',  
+					'password': 'cisco', 
+				},
+				{
+					'device_type': 'cisco_ios',
+					'ip': '172.17.7.2',  
+					'username': 'Sasha',  
+					'password': 'cisco', 
+				}
+				# Add more devices as needed
+			]
+			for device_info in devices:
+				connect_to_device(device_info)
+
+		if __name__ == "__main__":
+			main()
+			
+	- Execute a script with a statements (if, ifelse, else)
+		from netmiko import ConnectHandler
+
+		# List of devices
+		devices = [
+			{
+				'device_type': 'cisco_ios',
+				'ip': '172.17.7.1',  
+				'username': 'Sasha',  
+				'password': 'cisco', 
+			},
+			{
+				'device_type': 'cisco_ios',
+				'ip': '172.17.7.2',  
+				'username': 'Sasha',  
+				'password': 'cisco',
+			}
+		]
+
+		# Loop through each device
+		for device_info in devices:
+			
+			if device_info['ip'] == '172.17.7.1':
+				print("Connecting to Device 1...")
+				# Connect to Device 1
+				with ConnectHandler(**device_info) as conn:
+					conn.enable()
+					output = conn.send_command("show version")
+					print(output)
+			
+			elif device_info['ip'] == '172.17.7.2':
+				print("Connecting to Device 2...")
+				# Connect to Device 2
+				with ConnectHandler(**device_info) as conn:
+					conn.enable()
+					output = conn.send_command("show version")
+					print(output)
+			else:
+				print(f"Unknown host: {device_info['host']}")
+				
+Part 3: Connect to IOS-XE devices
+	- Send show commands to multiple devices
+	- Send configuration commands to multiple devices
+	- Run show commands and save the output
+	- Backup the device configurations
+	- Configure a subset of Interfaces
+	- Send device configuration using an external file
+	- Connect using a Python Dictionary
+	- Execute a script with a Function or classes
+	- Execute a script with a statements (if, ifelse, else)
+	
+Part 4: Create an challenging excited script as a network
+- Create an exciting and challenging script that a network engineer in a programmable era would use every day. Surprise your lecturer!
+
+from netmiko import ConnectHandler
+import time
+
+# Function to connect to devices and configure them
+def configure_devices(devices, config_commands):
+    for device in devices:
+        try:
+            print(f"Connecting to {device['host']}...")
+            with ConnectHandler(**device) as conn:
+                conn.enable()
+                output = conn.send_config_set(config_commands)
+                print(f"Configuration applied on {device['host']}:\n{output}\n")
+        except Exception as e:
+            print(f"Error connecting to {device['host']}: {str(e)}")
+            continue
+
+# Main function
+def main():
+    # List of devices to be configured
+    devices = [
+        {
+            'device_type': 'cisco_ios',
+            'host': '172.17.7.1',
+            'username': 'Sasha',
+            'password': 'cisco',
+        },
+        {
+            'device_type': 'cisco_ios',
+            'host': '172.17.7.2',
+            'username': 'Sasha',
+            'password': 'cisco',
+        },
+        # Add more devices as needed
+    ]
+
+    # Configuration commands to be applied to devices
+    config_commands = [
+        'interface GigabitEthernet0/0/1',
+        'description Connection to Switch A',
+        'no shutdown',
+        'interface GigabitEthernet0/0/0',
+        'description Connection to Switch B',
+        'no shutdown',
+        # Add more configuration commands as needed
+    ]
+
+    # Configure devices
+    configure_devices(devices, config_commands)
+
+if __name__ == "__main__":
+    main()

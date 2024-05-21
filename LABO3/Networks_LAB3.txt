@@ -1,0 +1,125 @@
+Part 1: Python Programming Review
+	Lab netacad: Cisco DEVNET 1.3.3
+	Document your findings and important commands.
+
+Part 2: Explore Python Development Tools
+	Lab netacad: Cisco DEVNET 3.1.12
+	Document your findings and important commands.
+	
+		Eerst werd gekeen welke versie van python actief was door het command python3 -V. Hier na werd er gekeken naar de environment met "which python3". 
+		Hier na moeten we naar een specifieke folder om een virtuele omgeving aan te maken met de tool venv. Het commano is python3 -m venv devfun (devfun is de naam van de omgeving)
+		Ten derde moet men de opgeving activeren door het command source /devfun/bin/activate. Nu zie je vooraan in de prompt (devfun) wat aangeet dat je in de nieuwe omgeving bent.
+		verfiëer nu of er pakketen zijn geinstalleerd in deze omgeving via het commando pip3 freeze. 
+		Vervolgens zal men een pakket installeren genaamd requests met het commando pip3 install requests voer opnieuw pip3 freeze uit op de installatie te verifieren. 
+		Om uit de virtuele omgeving te gaan gebuikt men deactivate. 
+		
+		Kijk nu welke pakketen geinstalleerd zijn op je system omgeving met het commando python3 -m pip freeze. Men ziet dat het er veel meer zijn. 
+		Om te filteren kan men grep gebruiken een boorbeeld hiervan is python3 -m pip freeze | grep requests. 
+		
+		Op de virtuele omgeving te heractiveren gebruikt men source devfun/bin/activate
+		Schijf de uitkomst van freeze weg naar een txt bestand als volgt pip3 freeze > requirements.txt. Hierna doe je een deactivate en voer het commando ls uit men ziet het txt bestand dat net aangemaakt werd. 
+		
+		Maar een nieuwe omgeving aan genaamd devnew en activeer deze. pip3 freeze geeft geen paketten weer. Deze kan men nu via de txt installeren met volgend command pip3 install -r requirements.txt. 
+		Verifieer met pip3 freeze.
+		
+Part 3: Explore Python Classes
+	Lab netacad: cisco DEVNET 3.4.6
+	Document your findings and important commands.
+	
+	Functie
+		Eerst werd er uit gelegd wat een functie is. Dit is een onafhankelijk gedefinieerd blok code die bij naam aangeroepen wordt.
+			bv.
+				# Define the function
+				def functionName:
+				...blocks of code...
+				# Call the function
+				functionName()
+	
+	Method
+		Dan wordt uitgelegd wat een methode is. in python verwijst een "methode" naar een functie die is gedefinieerd binnen een class. 
+		Het is een speciaal soort functie die is geassocieerd met een specifiek object van die class. 
+		Methoden worden gebruikt om het gedrag van objecten te definiëren en ermee te werken.
+		 bv. 
+			# Define the class
+			class className
+			# Define a method
+			def method1Name
+				...blocks of code
+			# Define another method
+			def method2Name
+				...blocks of code
+
+			# Instantiate the class
+			myClass = className()
+			# Call the instantiation and associated methods
+			myClass.method1Name()
+			myClass.method2Name()
+
+	Definieeren van een functie 
+		Eerst maakt men een functie aan in de map myCity.py de .py geeft aan dat het om een python script gaat. 
+		Het script ziet er alsvolgt uit : 
+			def myCity(city):
+				print("I live in " + city + ".")
+			# Functie wordt aan geroepen en afgedrukt op het scherm met volgende steden. 
+			myCity("Austin")
+			myCity("Tokyo")
+			myCity("Salzburg")
+			
+		Uitkomst
+			I live in Austin
+			I live in Tokyo.
+			I live in Salzburg
+		
+	Definieer een class in een methode
+		Mijn bevinding is als volgt. 
+		Een Python-klasse wordt gebruikt om objecten te maken met eigenschappen en methoden. 
+		De init() methode wordt gebruikt om een nieuw object te initialiseren wanneer het wordt gemaakt, en wordt automatisch aangeroepen bij instantiatie van de class. 
+		Instantiëring van een class creëert een nieuw object dat alle eigenschappen en methoden van die class erft. 
+		Hoewel het vaak wordt aangeduid als de init() "functie", wordt het technisch gezien beschouwd als een methode vanwege zijn relatie met de class.
+		
+		Er word class aan gemaakt en oniddelijk hierna wordt een fuctie opgegeven. Men moet opletten met de insprong na de class. Hierna kan met waardes toevoegen om deze te verifiëeren moet men deze printen.
+		Om the er zeker van te zijn dat loc een classe is print me deze uit op onderste regel die vb. Kijk volgend script. 
+		init() funtie = De self parameter is een verwijzing naar de huidige instantie van de class zelf en wordt gebruikt om variabelen te benaderen die toebehoren aan de hele class. (self.name, Self.country) 
+		bv (1). 
+			class Location:
+				def __init__(self, name, country):
+					self.name = name
+					self.country = country
+			loc = Location("Sasha", "Belgie")
+			print(loc.name)
+			print(loc.country)
+			print(type(loc))
+		
+		Vervolgens moet met een 2 functie schrijven binnen deze class. Bij het uitvoeren zal dit niets weergeven omdat men ook niet aanroept. In volgend voorbeeld wilt men er op wijzen
+		dat met een klass meerdere keeren kan aanroepen met verschillede waardes toegewezen. 
+		bv.
+		class Location:
+			def __init__(self, name, country):
+				self.name = name
+				self.country = country
+
+			def myLocation(self):
+				print("Hi, my name is " + self.name + " and I live in " + self.country + ".")
+		
+		# First instantiation of the class Location
+		loc1 = Location("Tomas", "Portugal")
+		# Call a method from the instantiated class
+		loc1.myLocation()
+		
+		loc2 = Location("Ying", "China")
+		loc3 = Location("Amare", "Kenya")
+		
+		loc2.myLocation()
+		loc3.myLocation()
+		your_loc = Location("Your_Name", "Your_Country")
+		your_loc.myLocation()
+
+	Als laatste Revieuw the circleClaass.py script 
+	mijn bevindingen
+	Dit script definieert een Python-klasse genaamd Circle, die bedoeld is om cirkels te vertegenwoordigen.
+		•	In de __init__() methode wordt de klasse geïnitialiseerd met een straal, die wordt toegewezen aan het attribuut radius.
+		•	De methode circumference() berekent de omtrek van de cirkel met behulp van de formule omtrek = 2 * π * straal.
+		•	De methode printCircumference() roept de circumference() methode aan om de omtrek van de cirkel te berekenen en af te drukken, samen met de straal van de cirkel.
+	Vervolgens worden er instanties gemaakt van de Circle klasse:
+		•	circle1 wordt geïnstantieerd met een straal van 2 en de methode printCircumference() wordt aangeroepen om de omtrek af te drukken.
+		•	Er worden nog twee instanties gemaakt, circle2 en circle3, elk met verschillende stralen, en dezelfde methode printCircumference() wordt voor elk ervan aangeroepen om hun respectievelijke omtrekken af te drukken.

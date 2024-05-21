@@ -1,0 +1,300 @@
+Part 1: Software Version Control with Git
+		start DEVASC VM
+		Open een terminal 
+	
+		voer volgende commandos uit 
+			git config --global user.name sasha
+			git config --global user.email sasha@hotmail.commandos
+		
+		Laten we kijken naar het resultaat via 
+			git config --list 
+	
+	Aanmaken van een repository 
+		cd labs/devnet-src/
+		mkdir git-intro
+		cd git-intro
+		git init
+	
+	conrole uitvoeren op je aangemaakte repository 
+		ls -a 
+		git status
+	
+	
+	Staging en committing
+		echo "I am on my way to passing the
+		Cisco DEVASC exam" > DEVASC.txt
+		ls -la
+		cat DEVASC.txt
+		git status
+		
+		Kijk naar het resultaat van git status. zie je "Git add". Dit gaan we gebruiken. 
+	
+	Staging 
+	Dit gedeelte maakt een snapshot van de file. Elke verandering verander je achteraf met "git add" command.
+		git add DEVASC.txt
+		git status
+	
+		Nu ziet men dat git status een andere uitkomst heeft. 
+	
+	Committing 
+	Door te committen laten we git weten dat we aanpassingen aan de file willen opvolgen.
+		git commit -m "Committing
+		DEVASC.txt to begin tracking changes"
+		
+		merk op telkens we commiten er een unique key is. 
+		Om de logs te bekijken gebruik volgend commando "git log"
+		
+	Modifying an Tracking
+	Modifying
+		echo "I am beginning to understand
+		Git!" >> DEVASC.txt
+		cat DEVASC.txt
+		git status
+	
+	Zoals eerder aangegeven elke verandering moet gestaged worden alvorens ze gecommit wordt. 
+		git add DEVASC.txt
+		git commit -m "Added additional
+		line to file"
+		
+		Bekijk veranderingen met git log
+		
+	Bekijk het verschil tussen commitments gebruikt tot commit keys
+		git diff <key1> <key2>
+	
+	Branches an Merging
+	Branches 
+	
+	Make and check a branch
+		git branch feature
+		git branch
+	
+	verander naar de branch en confirmeer. 
+		git checkout feature
+		git branch
+	
+	Modify de file van de branch
+		echo "This text was added
+		originally while in the feature branch" >> DEVASC.txt
+		cat DEVASC.txt
+	
+	Merge
+	zoals voorheen stage en commit de aanpassing 
+		git add DEVASC.txt
+		git status
+		git commit -m "Added a third line
+		in feature branch"
+		git log
+			
+	Verander terug naar de master branch
+		git checkout master
+		git branch
+		
+	voeg de file content toe en delete de feature branch 
+		git merge feature
+		cat DEVASC.txt
+		git branch -d feature
+		git branch
+	
+	Merge conflicts
+	Eerst maken we een branch aan en doe aanpassingen in de nieuwe branch.
+	Dan gaan we ander aanpassingen maken aan de master branch om een conflict te creeeren.
+		git branch test
+		git checkout test
+		sed -i 's/Cisco/NetAcad/' DEVASC.txt
+		git commit -a -m "Change Cisco to
+		NetAcad"
+		git checkout master
+		sed -i 's/Cisco/DevNet/' DEVASC.txt
+		git commit -a -m "Changed Cisco to
+		DevNet"
+		
+	merge
+	nu we dit uitgevoerd hebben probeer test met master 
+		git merge tes
+	
+		nu krijg je een conflict op de content van DEVASC.txt 
+		Check de log voor eventuele oplossingen 
+			git log
+		"HEAD" is de representatie van de master branch check de file 
+			cat DEVASC.txt 
+		
+		merk het volgende gedeelte op Notice the part between <<<<<<<<<<<<<< and >>>>>>>>>>>>>>q
+		
+		Delete de niet gewilde data in de file 
+			vim DEVASC.txt 
+		
+		probeer nu opnieuw te mergen 
+			git add DEVASC.txt
+			git commit -a -m "Manually merged
+			from test branch"
+			git log
+	Intigreer git met github 
+		maak een github account
+		maak een repository 
+			naam
+				devasc-study-team
+			discription
+				Working together to pass the DEVASC exam
+			Public/Private
+				private
+		
+		ga nu terug naar de terminal 
+			cd ~/labs/devnet-src/git-intro
+			mkdir devasc-study-team
+			cd devasc-study-team
+			cp ../DEVASC.txt .
+		initieer git 
+			git init
+			git config --list
+	
+			git config --global user.name "<GitHub username>"
+			git config --global user.name "<GitHub email-address>"
+			
+		Point git to github 
+			git remote add origin https://github.com/<github-username>/devasc-study-team.git
+			
+		stage an commit DEVASC.txt
+			git add DEVASC.txt
+			git commit -m "Add DEVASC.txt file to devasc-study-team"
+			git log
+			git status
+		
+		Ga nu naar Go to GitHub https://github.com/settings/tokens
+		aanmaken van een token 
+			git push origin master	
+				Username: <GithubUsername>
+				Password: <token>
+				
+		Verifieer de repository op github. 
+
+Part 3 
+	Start DEVASC VM	
+	start een terminal 
+		cd ~/labs/devnet-src/parsing
+	
+	Maak een script aan dat XML leesbaar maakt 
+		code parsexml.py
+	
+	Voeg het volgend script toe 
+	import xml.etree.ElementTree as ET
+	import re
+
+	xml = ET.parse("myfile.xml")
+	root = xml.getroot()
+
+	ns = re.match('{.*}', root.tag).group(0)
+	editconf = root.find("{}edit-config".format(ns))
+	defop = editconf.find("{}default-operation".format(ns))
+	testop = editconf.find("{}test-option".format(ns))
+
+	print("The default-operation contains: {}".format(defop.text))
+	print("The test-option contains: {}".format(testop.text))
+	
+	Save het script en run het je zou volgende uitkomst moeten bekomen. 
+		devasc@labvm:~/labs/devnet-src/parsing$ python3 parsexml.py
+		The default-operation contains: merge
+		The test-option contains: set
+		devasc@labvm:~/labs/devnet-src/parsing$
+	
+	Ontleden JSON in python 
+		Authentication 
+		Execute GET request
+		Modify returned JSON
+		Execute Poest/Put
+		
+		voorbeeld 
+			{
+			"access_token":"ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItY
+			TU3",
+			"expires_in":1209600,
+			"refresh_token":"MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTEyMzQ1
+			Njc4",
+			"refreshtokenexpires_in":7776000
+			}
+		code parsejson.py
+			
+		Voeg het volgende toe in het script 
+			import json
+			import yaml
+
+			with open('myfile.json','r') as json_file:
+			 ourjson = json.load(json_file)
+
+			print(ourjson)
+
+			print("The access token is: {}".format(ourjson['access_token']))
+			print("The token expires in {} seconds.".format(ourjson['expires_in']))
+	
+		We printen niet enkel JSON data maar ook data interesante data door de aangepaste print commando.
+		Save en run het script 
+			devasc@labvm:~/labs/devnet-src/parsing$ python3 parsejson.py
+			{'access_token': 'ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItYTU3',
+			'expires_in': 1209600, 'refresh_token':
+			'MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTEyMzQ1Njc4',
+			'refreshtokenexpires_in': 7776000}
+			1209600
+			The access token is ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItYTU3
+			The token expires in 1209600 seconds
+			devasc@labvm:~/labs/devnet-src/parsing$
+		
+		Output ontleden van JSON data in een YAML data formaat 
+		voeg het volgende toe aan het script 
+			print("\n\n---")
+			print(yaml.dump(ourjson))
+			
+			output:
+			devasc@labvm:~/labs/devnet-src/parsing$ python3 parsejson.py
+			...
+			access_token: ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItYTU3
+			expires_in: 1209600
+			refresh_token: MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTEyMzQ1Njc4
+			refreshtokenexpires_in: 7776000
+			devasc@labvm:~/labs/devnet-src/parsing$
+			
+		Ontleden van YAML
+		We gebruiken een YAML dump die we aangemaakt hebben in vorig stuk.
+		Maak een script om YAML data te ontleden. 
+			import json
+			import yaml
+
+			with open('myfile.yaml','r') as yaml_file:
+			 ouryaml = yaml.safe_load(yaml_file)
+
+			print(ouryaml)
+
+			print("The access token is {}".format(ouryaml['access_token']))
+			print("The token expires in {} seconds.".format(ouryaml['expires_in']))
+		
+		output: 
+			devasc@labvm:~/labs/devnet-src/parsing$ python3 parseyaml.py
+			{'access_token': 'ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItYTU3',
+			'expires_in': 1209600, 'refresh_token':
+			'MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTEyMzQ1Njc4',
+			'refreshtokenexpires_in': 7776000}
+			The access token is ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItYTU3
+			The token expires in 1209600 seconds.
+			devasc@labvm:~/labs/devnet-src/parsing$
+		
+		Output ontleden van YAML data in JSON data format 
+		zoals we deden bij JSON voeg lijnen to aan het script om een json dump te verkrijgen. 
+		Voeg het volgende toe 
+			print("\n\n")
+			print(json.dumps(ouryaml, indent=4))
+			
+		output:
+			devasc@labvm:~/labs/devnet-src/parsing$ python3 parseyaml.py
+			...
+			{
+			"access_token": "ZDI3MGEyYzQtNmFlNS00NDNhLWFlNzAtZGVjNjE0MGU1OGZmZWNmZDEwN2ItYTU3",
+			"expires_in": 1209600,
+			"refresh_token": "MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTEyMzQ1Njc4",
+			"refreshtokenexpires_in": 7776000
+			}
+			devasc@labvm:~/labs/devnet-src/parsing$
+		
+		
+			
+			
+			
+			
+			

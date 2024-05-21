@@ -1,0 +1,479 @@
+LAB 7 – YANG, NETCONFIG and RESTCONFIG
+Document your findings and important commands.
+
+Part 1: Install the CSR1000v VM
+Lab netacad: Cisco DEVNET 7.0.3
+
+Part 1 het installeren van CSR1000v VM
+
+	In de eerste stap moest er een .OVA bestand afgehaald worden van de onedrive (CSR1000v). 
+	Hier na halen we ook de iso af.De ova file kunnen we nu in virtual box importeren en en iso stop je in de CD drive. 
+	
+	Hierna moet je de net gedownloade iso in het CD drive plaatsen.
+	
+	Netwerk hebied moet je host-only adapter gebruiken  en als de host adapter niet bestaat maak deze dan aan. 
+	Ook moet men het IP-adress nakijken op vxboxnet0 deze moet binnen het netwerk 192.168.56.0/24 liggen. 
+	
+	Start nu de vm op. Verifieer dat Adapter 1 geconnecteerd is als host-only adapter
+	
+Part 2 verifieeren van de communicatie 
+	
+	Voer volgend command uit Show ip interface brief = deze zou je een ip moeten geven 192.168.56.101 op GigabitEthernet1 poort
+	Start DEVASC VM op en voer van hier uit een ping naar de router CSR1000v het IP hierboven vermeld. 
+	
+	Voer nu een ssh uit ssh cisco@192.168.56.101 met als password cisco123! vie de DEV VM
+	Open eveneens een webbowser en ga naar https://192.168.56.101 deze is de web interface van de route en je zou moeten kunnen inloggen met cisco paswword cisco123!.
+	Hier kan je een router dashboard kan je de router monitoren, configureren? en meer. 
+	
+	Open nu VScode en maak een folder aan met de naam pyang in de map /labs/devnet-src. 
+	Kopieer nu de url van de pyang pagina https://raw.githubusercontent.com/YangModels/yang/main/vendor/cisco/xe/1693/ietf-interfaces.yang
+	en ga naar een terminal voer hier het volgend commando uit https://raw.githubusercontent.com/YangModels/yang/main/vendor/cisco/xe/1693/ietf-interfaces.yang. 
+	Dit zorgt dat je een locale versie beschikbaar hebt. 
+	
+	Kijk of pyang aanwezig is en up to date is met volgende commands 
+		pyang -v 
+		pip3 install pyang --upgrade
+	
+	Voor meer uitleg gebruik 
+		pyang -h | more 
+		
+	Nu kunnen we ieft-ietf-interfaces.yang weergeven als een book struktuur doe dit met
+		pyang -f tree ietf-interfaces.yang
+
+Part 2: Explore YANG Models
+Lab netacad: Cisco DEVNET 8.3.5
+Document your findings and important commands.
+ 
+	Er wordt eerst gevraagd om https://github.com/YangModels/yang te openen. 
+	Onder master ga je naar Yang model voor cisco IOS EX versie 16.9.3. en ga vervolgens verder naar vendor > cisco > xe > 1693. 
+	Scroll nu naar beneden en vindt waar het model begint met IETF (itefinterface.yang). 
+	
+
+Part 3: Use NETCONF to Access an IOS XE Device
+Lab netacad: cisco DEVNET 8.3.6
+Document your findings and important commands.
+
+	Eerst moet er gezien worden of NETCONF SSH deamon (ncsshd) runt diet doe je met volgend commando.
+		show platform software yang-management process
+	
+		Indien diet niet het geval is doe je alsvolgt 
+		conf t
+		netconf-yang
+	
+	Op een sessie te openen moet men een bericht terug sturen doe dit via 
+		<hello xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+		 <capabilities>
+			<capability>urn:ietf:params:netconf:base:1.0</capability>
+		 </capabilities>
+		</hello>
+		]]>]]>
+	
+	Ga nu terug naar de VM CSR1KV en check of er een netconf sessie actief is. 
+		en
+		show netconf-yang session 
+			20 netconf-ssh cisco 192.168.56.1 None
+	
+	Tijdens een SSH-sessie kan een NETCONF-client Remote Procedure Call (RPC)-berichten gebruiken om NETCONF-operaties naar het IOS XE-apparaat te sturen.
+		<get>, <get-config>, <edit-config>, <copy-config>, <delete-config>, <commit> , <lock> / <unlock>, <close-session> , <kill-session>
+		
+	kopieer en plag het volgende RPC get bericht in de SSH serssie terminal om informatie te bekomen van R1
+	<rpc message-id="103" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"> 
+		<get>
+			<filter>
+				<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces"/>
+			</filter>
+		</get>
+	</rpc>
+	]]>]]>
+	
+	U zal een lange string van data ontvangen  
+	kopieer nu deze string zonder “]]>]]>” characters zoek nu naar een webpagina
+	om de XML mooier zichtbaar te maken 
+	
+	<?xml version="1.0"?>
+	<rpc-reply xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="103">
+		<data>
+			<interfaces xmlns="urn:ietf:params:xml:ns:yang:ietf-interfaces">
+				<interface>
+					<name>GigabitEthernet1</name>
+					<description>VBox</description>
+					<type xmlns:ianaift="urn:ietf:params:xml:ns:yang:iana-if-type">ianaift:ethernetCsmacd</type>
+					<enabled>true</enabled>
+					<ipv4 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip"/>
+					<ipv6 xmlns="urn:ietf:params:xml:ns:yang:ietf-ip"/>
+				</interface>
+			</interfaces>
+		</data>
+	</rpc-reply>
+	
+	Om de NETCONF sessie te sluiten gebruik je volgend commando 
+	<rpc message-id="9999999" xmlns="urn:ietf:params:xml:ns:netconf:base:1.0">
+		<close-session />
+	</rpc>
+	
+gebruik ncclient om te connecteren met netconf
+	op devasc voer het volgend commando uit 
+		pip3 list --format=columns | more
+	zoek vervolgens naar "ncclient 0.6.7"
+	
+	creeer vervolgens een sript om ncclient te connecteren met NETCONF
+		maak een folder netconf aan en dan een python script ncclient-netconf.py via VScode
+		inhoud ziet er als volgt uit met de parameter en al zijn variabele
+		
+		from ncclient import manager
+		m = manager.connect(
+			host="192.168.56.101",
+			port=830,
+			username="cisco",
+			password="cisco123!",
+			hostkey_verify=False
+		)
+		
+		Ga nu naar je virtuele router dier zou een syslog message moeten komen of van boven in de banner
+		
+		voor een loop en een frint functie voeg het volgende toe aan je script 
+		
+		print("#Supported Capabilities (YANG models):")
+		for capability in m.server_capabilities:
+			print(capability)
+		
+		Gebruik ncclient om configuratie terug te halen
+		outcommand vorige command
+		Om de vele lijnen te vermijden kan men de get_config() methode gebruiken alsvolgt 
+			netconf_reply = m.get_config(source="running")
+			print(netconf_reply)
+		Gebruik voorgaande site om het terug leesbaar te maken. 
+		
+	Gebruik python om xml mooier te maken
+		 voeg aan het begin van je script het volgende toe 
+			import xml.dom.minidom
+		vervang print(netconf_reply) naar 
+			print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
+		Save je file en voer deze opnieuw uit 
+		
+	Gebruik een filter get_config() om enkel YANG model te ontvangen 
+		maar volgende variabele aan 
+			netconf_filter = """
+			<filter>
+				<native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native" />
+			</filter>
+			"""
+			netconf_reply = m.get_config(source="running", filter=netconf_filter)
+			print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
+		
+		Men zal nu <native></native> zien 
+	
+	gebruik ncclient om een device te configureren
+		
+		Defigneer nu een config variabele in je scrip en verander hostnaam zoals je west 
+			netconf_hostname = """
+			<config>
+				<native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
+					<hostname>NEWHOSTNAME</hostname>
+				</native>
+			</config>
+			"""
+		gebruik de edit_config() functier van de m NETCONF sessie om de configuratie te versturen en op te slaan. 
+		Dit resulteerd in een netconf_reply variable zodat deze geprint kan worden
+			netconf_reply = m.edit_config(target="running", config=netconf_hostname)
+			print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
+		
+		Save en sla de file op na het runnen zal deze eindigen op een <ok/>
+	
+	gebruik ncclient om een loopback interface aan te maken op R1
+	maar opnieuw een <config> variabele aan  dat de configuratie van de loopback inhoudt 
+		netconf_loopback = """
+		<config>
+			<native xmlns="http://cisco.com/ns/yang/Cisco-IOS-XE-native">
+				<interface>
+					<Loopback>
+						<name>1</name>
+						<description>My first NETCONF loopback</description>
+						<ip>
+							<address>
+								<primary>
+									<address>10.1.1.1</address>
+									<mask>255.255.255.0</mask>
+								</primary>
+							</address>
+						</ip>
+					</Loopback>
+				</interface>
+			</native>
+		</config>
+		"""
+	
+	voeg nu het volgende edit_config toe aan je ncclient_netconf.py script en voer dit uit 
+		netconf_reply = m.edit_config(target="running", config=netconf_loopback)
+		print(xml.dom.minidom.parseString(netconf_reply.xml).toprettyxml())
+	
+	in dien je nu inlogt op je virtuele router kan men zien dat loopback1 toegevoegd is 
+	
+	indien men opnieuw een loopback interface wilt aanmaken met het zelfde ipadress dit zal 
+	resulteren in een "Device refused one or more commands" en zal dus niet uitgevoerd worden. 
+	
+	
+Part 4: Use RESTCONF to Access an IOS XE Device
+Lab netacad: cisco DEVNET 8.3.7
+Document your findings and important commands.
+
+Part1: 
+	Is het opstarten van beide machines. 
+	Vanaf je devasc machine voer je een pin uit naar 192.168.56.101. 
+	Indien gelukt voer je vervolgens een ssh cisco@192.168.56.101 uit en antwoord met het password cisco123!
+	
+Part2:
+	eerst gaan we bekijken of RESTCONF deamon runt via volgend commando
+		Show platform software yang-management process
+	Nu kunnen we deamon ook enablen 
+		configure terminal
+		restconf
+		exit 
+		Show platform software yang-management process
+	Vervolgens gaan we HTTP service enable en verifiëren 
+		configure terminal
+		ip http secure-server
+		ip http authentication local
+		exit
+		show platform software yang-management process
+		
+Part 3 open en configure Postman: 
+	Allereerst moet de applicatie "Postman" geopend worden op devasc vm
+	Dan moeten we SSL certificatie  uitzetten 
+		a. Click File > Settings.
+		b. Under the General tab, set the SSL certificate verification to OFF.
+		c. Close the Settings dialog box.
+	
+Part 4: use postman to Send GET Requests
+	In het midden boven aan ziet men een + dit opent een nieuw launchpad 
+	Hierna laat je Get staan en geef je het ip op van je virtual router alsvolgt https://192.168.56.101/restconf/
+	de volgende stap is authorisation aanpassen dit doe je alsvolgt. 
+		a. Click the Authorization tab.
+		b. Under Type, click the down arrow next to “Inherit auth from parent” and choose Basic Auth.
+		c. For Username and Password, enter the local authentication credentials for the CSR1kv:
+			Username: cisco
+			Password: cisco123!
+		d. Click Headers. Then click the 7 hidden. You can verify that the Authorization key has a Basic value that will be used to authenticate the request when it is sent to the CSR1kv.
+		
+	Vervolgens JSON instellen als dataype om te gebruiken 
+		a. In the Headers area, click in the first blank Key field and type Content-Type for the type of key. In the Value field, type application/yang-data+json. This tells Postman to send JSON data to the CSR1kv.
+		b. Below your Content-Type key, add another key/value pair. The Key field is Accept and the Value field is application/yang-data+json.
+	
+	Men kan nu op Send button klikken en men zal een antwoord krijgen in een JSON formaat 
+		{
+			"ietf-restconf:restconf": {
+				"data": {},
+				"operations": {},
+				"yang-library-version": "2016-06-21"
+			}
+		}
+	
+	Nu een Get request om informatie te verkrijgen van alle interfaces van de virtuele route 
+		https://192.168.56.101/restconf/data/ietf-interfaces:interfaces
+		
+		{
+		"ietf-interfaces:interfaces": {
+			"interface": [
+				{
+					"name": "GigabitEthernet1",
+					"description": "VBox",
+					"type": "iana-if-type:ethernetCsmacd",
+					"enabled": true,
+					"ietf-ip:ipv4": {},
+					"ietf-ip:ipv6": {}
+					}
+				]
+			}
+		}
+	Verzamelen van informatie van een specifice poort 
+		https://192.168.56.101/restconf/data/ietf-interfaces:interfaces/interface=GigabitEthernet1
+		
+		{
+		"ietf-interfaces:interface": {
+			"name": "GigabitEthernet1",
+			"description": "VBox",
+			"type": "iana-if-type:ethernetCsmacd",
+			"enabled": true, "ietf-ip:ipv4": {},
+			"ietf-ip:ipv6": {}
+			}
+		}
+		
+	Indien men een "Show running config" uitvoert zal het ip adress niet zichtbaar zijn omdat deze van de DHCP komt te zien door het command "show ip int brief"
+	Dit gaan we veranderen door volgende stappen uit te voeren 
+		conft 
+		interface g1
+		ip address 192.168.56.101 255.255.255.0
+		end
+		show ip int brief
+	Men zal nu zien dat de method manual is omdat we deze manueel veranderd hebben. 
+	in indien men het post man commando opnieuw laten open op de interface ziet men dat er nu wel een ip aanwezig is 
+		{
+		"ietf-interfaces:interface": {
+			"name": "GigabitEthernet1",
+			"description": "VBox",
+			"type": "iana-if-type:ethernetCsmacd",
+			"enabled": true, "ietf-ip:ipv4": {
+			"address": [
+				{ 
+					"ip": "192.168.56.101", 
+					"netmask": "255.255.255.0"
+				}
+				]
+			},
+			"ietf-ip:ipv6": {}
+			}
+			}
+			
+Part 5 Postman gebruiken om een PUT uit te voeren
+	a. Duplicate the last GET request.
+	b. For the Type of request, click the down arrow next to GET and choose PUT.
+	c. For the interface= parameter, change it to =Loopback1 to specify a new interface.
+			https://192.168.56.101/restconf/data/ietf-interfaces:interfaces/interface=Loopback1
+	
+	indien men nu verstuurd zal men een error terug krijgen omdat loopback nog niet aangemaakt is 
+	klik bovenaan op Body -> raw -> koppieer de output van de get request en pas deze aan alsvolgt 
+{
+    "ietf-interfaces:interface": {
+        "name": "Loopback1",
+        "description": "My first RESTCONF loopback",
+        "type": "iana-if-type:softwareLoopback",
+        "enabled": true,
+        "ietf-ip:ipv4": {
+            "address": [
+                {
+                    "ip": "10.1.1.1",
+                    "netmask": "255.255.255.0"
+                }
+            ]
+        },
+        "ietf-ip:ipv6": {}
+    }
+}
+				
+				Indien men nu een show ip interface brief uitvoert op devasc ziet men dat de loopback toegevoegd is 
+				
+Part 6 gebruik python script om een get request te versturen. 
+	Stap 1 aanmaken van een restconf map en het script starten 
+		Open VScode 
+			en maak een map in in de /labs/devnet-src als volgt 
+				devasc@labvm:~/labs/devnet-src$ mkdir restconf
+			open deze folder in vscode en maak een file en geeft het de benaming restconf-get.py
+			vul deze folder aan met het volgende om SSL certificaten te disabelen
+				import json
+				import requests
+				requests.packages.urllib3.disable_warnings()
+	Stap 2 aanmaken van variabele
+			a. Create a variable named api_url and assign it the URL that will access the interface information on the CSR1kv.
+				api_url = "https://192.168.56.101/restconf/data/ietf-interfaces:interfaces"
+			b. Create a dictionary variable named headers that has keys for Accept and Content-type and assign the keys the value application/yang-data+json.
+				headers = { "Accept": "application/yang-data+json",
+							"Content-type":"application/yang-data+json"
+							}
+			c. Create a Python tuple variable named basicauth that has two keys needed for authentication, username and password.
+				basicauth = ("cisco", "cisco123!")
+				
+	Stap 3 aanmaken van variabele om een request te sturen en op te slaan
+		resp = requests.get(api_url, auth=basicauth, headers=headers, verify=False)
+		
+		om de response code weer te geven moet het volgende toegevoegd worden 
+		print(resp)
+		
+		Sla het script nu op en voer deze uit 
+		
+		Na het uitvoeren zou men een response code200 moeten terug krijgen. 
+	
+	Stap 4 formateer en geef de jason dat weer terug komend van CSR1KV
+		de response JSON is niet compatibel met Python voeg daarom volgende variabele toe 
+		response_json = resp.json()
+		print(response_json)
+		
+		Save en run het script opnieuw 
+				<Response [200]>
+				{'ietf-interfaces:interfaces': {'interface': [{'name': 'GigabitEthernet1', 'description': 'VBox', 'type': 'iana-if-type:ethernetCsmacd', 'enabled': True, 'ietf-ip:ipv4': {'address': [{'ip': '192.168.56.101', 'netmask': '255.255.255.0'}]}, 'ietf-ip:ipv6': {}}, {'name': 'Loopback1', 'description': 'My first RESTCONF loopback', 'type': 'iana-if-type:softwareLoopback', 'enabled': True, 'ietf-ip:ipv4': {'address': [{'ip': '10.1.1.1', 'netmask': '255.255.255.0'}]}, 'ietf-ip:ipv6': {}}]}}
+
+		omdat deze output niet mooie zichtbaar is kan u het volgende toevoegen 	
+		print(json.dumps(response_json, indent=4))
+
+<Response [200]>
+{
+"ietf-interfaces:interfaces": {
+"interface": [
+{
+"name": "GigabitEthernet1",
+"description": "VBox",
+"type": "iana-if-type:ethernetCsmacd",
+"enabled": true,
+"ietf-ip:ipv4": {
+"address": [
+{
+"ip": "192.168.56.101",
+"netmask": "255.255.255.0"
+}
+]
+},
+"ietf-ip:ipv6": {}
+},
+{
+"name": "Loopback1",
+"description": "My first RESTCONF loopback",
+"type": "iana-if-type:softwareLoopback",
+"enabled": true,
+"ietf-ip:ipv4": {
+"address": [
+{
+"ip": "10.1.1.1",
+"netmask": "255.255.255.0"
+}
+]
+},
+"ietf-ip:ipv6": {}
+}
+]
+}
+}
+
+Part 7 Python gebruiken om PUT request te versturen
+	maak een nieuwe file aan genoemd restconf-put.py
+	 
+	 voeg het volgende toe aan de file 
+	 import json
+	 import requests
+	 requests.packages.urllib3.disable_warnings()
+
+	 api_url = "https://192.168.56.101/restconf/data/ietf-interfaces:interfaces/interface=Loopback2"
+	 headers = { "Accept": "application/yang-data+json",
+				 "Content-type":"application/yang-data+json"
+				}
+	 basicauth = ("cisco", "cisco123!")
+
+	 yangConfig = {
+		"ietf-interfaces:interface": { 
+			"name": "Loopback2",
+			"description": "My second RESTCONF loopback",
+			"type": "iana-if-type:softwareLoopback", "enabled": True,
+			"ietf-ip:ipv4": {
+			"address": [
+				{ 
+					"ip": "10.2.1.1",
+					"netmask": "255.255.255.0"
+				}
+			]
+		},
+		"ietf-ip:ipv6": {}
+	}
+}
+
+resp = requests.put(api_url, data=json.dumps(yangConfig), auth=basicauth, headers=headers, verify=False)
+if(resp.status_code >= 200 and resp.status_code <= 299):
+	print("STATUS OK: {}".format(resp.status_code))
+else:
+	print('Error. Status Code: {} \nError message: {}'.format(resp.status_code,resp.json()))
+
+
+in dien men dit scrip uit voert zal men nu op de virtuele router zien dat loopback2 toe gevoegd is. 
+
+
+
+
+
+
